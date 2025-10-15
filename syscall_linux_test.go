@@ -65,11 +65,9 @@ func TestSetuidEtc(t *testing.T) {
 
 	for i, v := range vs {
 		// Generate some thread churn as we execute the tests.
-		// TODO: un-comment this when the thread churn doesn't
-		// interfere with the syscall tests.
-		//c := make(chan struct{})
-		//go killAThread(c)
-		//close(c)
+		c := make(chan struct{})
+		go killAThread(c)
+		close(c)
 
 		if err := v.fn(); err != nil {
 			if syscall.Getuid() == 0 && syscall.Getgid() == 0 {
