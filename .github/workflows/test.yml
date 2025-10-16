@@ -107,7 +107,7 @@ jobs:
         if: runner.os == 'Linux'
         run: env CGO_ENABLED=0 go test -c -o purego.test .
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: runner.os == 'Linux'
         with:
           name: executable
