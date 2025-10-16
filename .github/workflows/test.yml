@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        go: ['1.24.x', '1.25.x']
+        go: ['1.25.x']
     name: Test with Go ${{ matrix.go }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
@@ -103,8 +103,41 @@ jobs:
           go mod vendor
           go build -v .
 
+      - name: build
+        if: runner.os == 'Linux'
+        run: env CGO_ENABLED=0 go test -c -o purego.test .
+
+      - uses: actions/upload-artifact@v3
+        if: runner.os == 'Linux'
+        with:
+          name: executable
+          path: ./purego.test
+
+      - name: Set cores to get stored in /cores
+        if: runner.os == 'Linux'
+        run: |
+          sudo mkdir /cores
+          sudo chmod 777 /cores
+          # Core filenames will be of the form executable.pid.timestamp:
+          sudo bash -c 'echo "/cores/%e.%p.%t" > /proc/sys/kernel/core_pattern'
+
+      - name: Run the binary
+        if: runner.os == 'Linux'
+        run: |
+          # Allow core dumps
+          ulimit -c unlimited
+          # Run the program, triggering core dump
+          ./purego.test -test.v -test.shuffle=on -test.count=10
+
+      - uses: actions/upload-artifact@v3
+        if: ${{ failure() }}  # Run only if something went wrong
+        with:
+          name: cores
+          path: /cores
+
       - name: go test
         run: |
+          ulimit -c unlimited
           env CGO_ENABLED=0 go test -shuffle=on -v -count=10 ./...
           env CGO_ENABLED=1 go test -shuffle=on -v -count=10 ./...
           # Compile without optimization to check potential stack overflow.
