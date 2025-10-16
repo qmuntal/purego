@@ -105,7 +105,7 @@ jobs:
 
       - name: build
         if: runner.os == 'Linux'
-        run: env CGO_ENABLED=0 go test -c -o purego.test .
+        run: env CGO_ENABLED=0 go test -c -o purego.test "-gcflags=all=-N -l" .
 
       - uses: actions/upload-artifact@v4
         if: runner.os == 'Linux'
@@ -137,7 +137,6 @@ jobs:
 
       - name: go test
         run: |
-          ulimit -c unlimited
           env CGO_ENABLED=0 go test -shuffle=on -v -count=10 ./...
           env CGO_ENABLED=1 go test -shuffle=on -v -count=10 ./...
           # Compile without optimization to check potential stack overflow.
