@@ -111,22 +111,9 @@ jobs:
           # Core filenames will be of the form executable.pid.timestamp:
           sudo bash -c 'echo "/cores/%e.%p.%t" > /proc/sys/kernel/core_pattern'
 
-      - name: Run the binary
-        if: runner.os == 'Linux'
-        run: |
-          # Allow core dumps
-          ulimit -c unlimited
-          # Run the program, triggering core dump
-          env CGO_ENABLED=0 go test -shuffle=on -v -count=10 ./...
-
-      - uses: actions/upload-artifact@v4
-        if: ${{ failure() }}  # Run only if something went wrong
-        with:
-          name: cores
-          path: /cores
-
       - name: go test
         run: |
+          ulimit -c unlimited
           env CGO_ENABLED=0 go test -shuffle=on -v -count=10 ./...
           env CGO_ENABLED=1 go test -shuffle=on -v -count=10 ./...
           # Compile without optimization to check potential stack overflow.
@@ -134,6 +121,12 @@ jobs:
           # See also https://go.googlesource.com/vscode-go/+/HEAD/docs/debugging.md#launch.
           env CGO_ENABLED=0 go test "-gcflags=all=-N -l" -v ./...
           env CGO_ENABLED=1 go test "-gcflags=all=-N -l" -v ./...
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ failure() }}  # Run only if something went wrong
+        with:
+          name: cores
+          path: /cores
 
       - name: go test (Linux arm64)
         if: runner.os == 'Linux'
