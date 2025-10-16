@@ -129,7 +129,7 @@ jobs:
           # Run the program, triggering core dump
           ./purego.test -test.v -test.shuffle=on -test.count=10
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: ${{ failure() }}  # Run only if something went wrong
         with:
           name: cores
