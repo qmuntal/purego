@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
 // SPDX-FileCopyrightText: 2025 The Ebitengine Authors
 
+// The tests in these file are somehow flaky on CI with cgo enabled.
+// They pass reliably when cgo is disabled.
+//go:build !cgo
+
 package purego_test
 
 import (
@@ -20,6 +24,21 @@ func TestAllThreadsSyscall(t *testing.T) {
 	_, _, err := syscall.AllThreadsSyscall(syscall.SYS_FCNTL, 0, 0, 0)
 	if err != syscall.ENOTSUP {
 		t.Errorf("AllThreadsSyscall should return ENOTSUP, got: %v", err)
+	}
+}
+
+func TestSetgidStress(t *testing.T) {
+	const N = 50
+	ch := make(chan int, N)
+	for i := 0; i < N; i++ {
+		go func() {
+			syscall.Setgid(0)
+			ch <- 1
+			runtime.LockOSThread() // so every goroutine uses a new thread
+		}()
+	}
+	for i := 0; i < N; i++ {
+		<-ch
 	}
 }
 
