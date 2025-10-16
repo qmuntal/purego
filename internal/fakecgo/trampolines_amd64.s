@@ -74,19 +74,15 @@ TEXT ·setg_trampoline(SB), NOSPLIT, $0-16
 	CALL BX
 	RET
 
-TEXT threadentry_trampoline(SB), NOSPLIT|NOFRAME, $0
+TEXT threadentry_trampoline(SB), NOSPLIT, $0
 	PUSH_REGS_HOST_TO_ABI0()
 
-	// Reserve space for spill slots.
-	NOP	SP		// disable vet stack checking
-	ADJSP   $24
+	PXOR	X15, X15
 
 	MOVQ DI, AX
 	MOVQ ·threadentry_call(SB), DX
 	MOVQ (DX), CX
 	CALL CX
-
-	ADJSP	$-24
 
 	POP_REGS_HOST_TO_ABI0()
 	RET
