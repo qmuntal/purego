@@ -75,6 +75,7 @@ TEXT ·setg_trampoline(SB), NOSPLIT, $0-16
 	RET
 
 TEXT threadentry_trampoline(SB), NOSPLIT, $0
+	// See crosscall2.
 	PUSH_REGS_HOST_TO_ABI0()
 
 	PXOR	X15, X15
