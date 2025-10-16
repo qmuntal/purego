@@ -103,16 +103,6 @@ jobs:
           go mod vendor
           go build -v .
 
-      - name: build
-        if: runner.os == 'Linux'
-        run: env CGO_ENABLED=0 go test -c -o purego.test "-gcflags=all=-N -l" .
-
-      - uses: actions/upload-artifact@v4
-        if: runner.os == 'Linux'
-        with:
-          name: executable
-          path: ./purego.test
-
       - name: Set cores to get stored in /cores
         if: runner.os == 'Linux'
         run: |
@@ -127,7 +117,7 @@ jobs:
           # Allow core dumps
           ulimit -c unlimited
           # Run the program, triggering core dump
-          ./purego.test -test.v -test.shuffle=on -test.count=10
+          env CGO_ENABLED=0 go test -shuffle=on -v -count=10 ./...
 
       - uses: actions/upload-artifact@v4
         if: ${{ failure() }}  # Run only if something went wrong
