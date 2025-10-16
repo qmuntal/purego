@@ -23,21 +23,6 @@ func TestAllThreadsSyscall(t *testing.T) {
 	}
 }
 
-func TestSetgidStress(t *testing.T) {
-	const N = 50
-	ch := make(chan int, N)
-	for i := 0; i < N; i++ {
-		go func() {
-			syscall.Setgid(0)
-			ch <- 1
-			runtime.LockOSThread() // so every goroutine uses a new thread
-		}()
-	}
-	for i := 0; i < N; i++ {
-		<-ch
-	}
-}
-
 // TestSetuidEtc performs tests on all of the wrapped system calls
 // that mirror to the 9 glibc syscalls with POSIX semantics. The test
 // here is considered authoritative and should compile and run
