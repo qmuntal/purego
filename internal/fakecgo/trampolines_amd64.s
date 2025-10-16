@@ -74,7 +74,7 @@ TEXT ·setg_trampoline(SB), NOSPLIT, $0-16
 	CALL BX
 	RET
 
-TEXT threadentry_trampoline(SB), NOSPLIT, $0
+TEXT threadentry_trampoline(SB), NOSPLIT|NOFRAME, $0
 	PUSH_REGS_HOST_TO_ABI0()
 	MOVQ DI, AX
 	MOVQ ·threadentry_call(SB), DX
